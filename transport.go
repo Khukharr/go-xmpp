@@ -22,6 +22,7 @@ type TransportConfiguration struct {
 	// tls.Config must not be modified after having been passed to NewClient. Any
 	// changes made after connecting are ignored.
 	TLSConfig     *tls.Config
+	LegacyTLS     bool
 	CharsetReader func(charset string, input io.Reader) (io.Reader, error) // passed to xml decoder
 }
 

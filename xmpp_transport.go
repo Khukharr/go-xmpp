@@ -35,7 +35,12 @@ var clientStreamOpen = fmt.Sprintf("<?xml version='1.0'?><stream:stream to='%%s'
 func (t *XMPPTransport) Connect() (string, error) {
 	var err error
 
-	t.conn, err = net.DialTimeout("tcp", t.Config.Address, time.Duration(t.Config.ConnectTimeout)*time.Second)
+	dialer := &net.Dialer{Timeout: time.Duration(t.Config.ConnectTimeout) * time.Second}
+	if t.Config.LegacyTLS {
+		t.conn, err = tls.DialWithDialer(dialer, "tcp", t.Config.Address, t.Config.TLSConfig)
+	} else {
+		t.conn, err = dialer.Dial("tcp", t.Config.Address)
+	}
 	if err != nil {
 		return "", NewConnError(err, true)
 	}
@@ -62,7 +67,7 @@ func (t *XMPPTransport) StartStream() (string, error) {
 }
 
 func (t *XMPPTransport) DoesStartTLS() bool {
-	return true
+	return !t.Config.LegacyTLS
 }
 
 func (t *XMPPTransport) GetDomain() string {
